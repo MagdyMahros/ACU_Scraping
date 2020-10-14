@@ -1,6 +1,6 @@
 """Description:
-
     * author: Awwal Mohammed
+    * refactored and edited by: Magdy Abdelkader
     * company: Fresh Futures/Seeka Technologies
     * position: IT Intern
     * date: 12-10-20
@@ -49,13 +49,13 @@ browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
 
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
-course_links_file_path = course_links_file_path.__str__() + '/acu_bachelors_links_file'
+course_links_file_path = course_links_file_path.__str__() + '/acu_bachelors_links_file.txt'
 course_links_file = open(course_links_file_path, 'r')
 
 
 # the csv file we'll be saving the courses to
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
-csv_file = csv_file_path.__str__() + 'ACU_bachelors.csv'
+csv_file = csv_file_path.__str__() + '/ACU_bachelors.csv'
 
 bad_words = ['[#435902:0]', 'END', 'START', '#435844', '#', '[', ']', '435902:2', '#435902:3',
              '(pos1) #435848', '[#435902:', '(pos1) #435848', '#435844 [#435902:1]', '#435844',
