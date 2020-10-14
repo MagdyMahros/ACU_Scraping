@@ -120,11 +120,16 @@ for each_url in course_links_file:
                         temp_dd = []
                         for i in p_dd:
                             if not isinstance(i, bs4.NavigableString):
-                                temp_dd.append(i.__str__())
+                                if i.next_sibling == None:
+                                    temp_dd.append(i.text)
+
+                                elif i.next_sibling != None:
+                                    temp_dd.append(i.text)
+                                    temp_dd.append(i.next_sibling)
                             elif isinstance(i, bs4.Tag):
                                 temp_dd.append(i.name.__str__())
                             else:
-                                temp_dd.append(p_dd.get_text())
+                                temp_dd.append('.')
                         temp_dd = ' '.join(temp_dd)
                         dd_all_text.append(temp_dd)
                     ul_dd = each_dd.find('ul', class_='ret-negated')
