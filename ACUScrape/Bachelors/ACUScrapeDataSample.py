@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from selenium import webdriver
 import bs4 as bs4
+from bs4 import Comment
 import requests
 import os
 
@@ -30,9 +31,6 @@ def get_page(url):
     return None
 
 
-def remove_banned_words(to_print, database_regex):
-    pattern = re.compile(r"\b(" + "|".join(database_regex) + ")\\W", re.I)
-    return pattern.sub("", to_print)
 
 
 # selenium web driver
@@ -44,24 +42,18 @@ option.add_argument(" - incognito")
 option.add_argument("headless")
 option.add_argument('--no-sandbox')
 exec_path = Path(os.getcwd().replace('\\', '/'))
-exec_path = exec_path.parent.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
-browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
+exec_path = exec_path.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
+browser = webdriver.Chrome(executable_path=exec_path, options=option)
 
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
-course_links_file_path = course_links_file_path.__str__() + '/acu_bachelors_links_file.txt'
+course_links_file_path = course_links_file_path.__str__() + '/acu_research_links_file.txt'
 course_links_file = open(course_links_file_path, 'r')
 
 
 # the csv file we'll be saving the courses to
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
 csv_file = csv_file_path.__str__() + '/ACU_bachelors.csv'
-
-bad_words = ['[#435902:0]', 'END', 'START', '#435844', '#', '[', ']', '435902:2', '#435902:3',
-             '(pos1) #435848', '[#435902:', '(pos1) #435848', '#435844 [#435902:1]', '#435844',
-             '#435844', '[#', '#435844', '#435844', '[#435902:', '#435844', 'START: (pos1) #435862 [#435903:0]',
-             'END:  (pos1) #435862', 'START: #435858', 'END:  #435858', 'START: #435858', 'END:  #435858',
-             'START: #435858', 'END:  #435858']
 
 course_data = dict()
 course_data_all = []
@@ -163,22 +155,25 @@ for each_url in course_links_file:
                     for ul in all_ul:
                         li = ul.find('li')
                         if li:
-                            li_list = [x.__str__() for x in li]
-                            all_inter_start_date.append(' '.join(li_list))
+                            for text in li(text=lambda text: isinstance(text, Comment)):
+                                text.extract()
+                                li_list = li.text
+#                             li_list = [x.__str__() for x in li]
+                            all_inter_start_date.append(li_list)
 
                 try:
                     course_data['Brisbane_International_Start_Date'] = \
-                        remove_banned_words(all_inter_start_date[0].strip(), bad_words)
+                        all_inter_start_date[0].replace('\n','')
                 except IndexError:
                     course_data['Brisbane_International_Start_Date'] = 'null'
                 try:
                     course_data['Melbourne_International_Start_Date'] = \
-                        remove_banned_words(all_inter_start_date[1].strip(), bad_words)
+                        all_inter_start_date[1].replace('\n','')
                 except IndexError:
                     course_data['Melbourne_International_Start_Date'] = 'null'
                 try:
                     course_data['North_Sydney_International_Start_Date'] = \
-                        remove_banned_words(all_inter_start_date[2].strip(), bad_words)
+                        all_inter_start_date[2].replace('\n','')
                 except IndexError:
                     course_data['North_Sydney_International_Start_Date'] = 'null'
 

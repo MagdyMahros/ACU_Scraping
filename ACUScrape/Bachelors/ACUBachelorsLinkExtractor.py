@@ -38,7 +38,7 @@ option.add_argument(" - incognito")
 option.add_argument("headless")
 exec_path = Path(os.getcwd().replace('\\', '/'))
 exec_path = exec_path.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
-browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
+browser = webdriver.Chrome(executable_path=exec_path, options=option)
 
 
 # MAIN ROUTINE
