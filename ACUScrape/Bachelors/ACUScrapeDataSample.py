@@ -252,6 +252,29 @@ for each_url in course_links_file:
                         course_data['International first year cost'] = int_costs_firstYear.strip()
                         course_data['International total cost'] = int_costs_total.strip()
 
+    #CAREER PATH
+    career_path_div = soup.find('div', id='course--career--domestic')
+    if career_path_div:
+        career_path_div1 = career_path_div.find('div', class_='col-md-9 course-info__details')
+        if career_path_div1:
+            career_path = ['']
+            p = career_path_div1.find('p')
+            ul = career_path_div1.find('ul')
+            if ul:
+                li = ul.find_all('li')
+                if li:
+                    for element in li:
+                        one_career = element.contents.__str__().strip()
+                        if one_career:
+                            one_career = element.get_text().strip()
+                            career_path.append(one_career)
+            elif p and not ul:
+                careerP = p.contents.__str__().strip()
+                if careerP:
+                    careerP = p.get_text().strip()
+                    career_path.append(careerP)
+            career_path = ' '.join(career_path)
+            course_data['Career_path'] = career_path.strip()
     course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
     course_data_all.append(course_data)
 
