@@ -15,6 +15,7 @@ import bs4 as bs4
 from bs4 import Comment
 import requests
 import os
+import DurationConverter
 
 
 def get_page(url):
@@ -55,7 +56,11 @@ course_links_file = open(course_links_file_path, 'r')
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
 csv_file = csv_file_path.__str__() + '/ACU_bachelors.csv'
 
-course_data = dict()
+course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
+               'Full_Time': '', 'Part_Time': '', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
+               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': ''}
+
+
 course_data_all = []
 for each_url in course_links_file:
     browser.get(each_url)
@@ -143,23 +148,25 @@ for each_url in course_links_file:
                     for value in dd_all_text:
                         for value in dd_all_text:
                         # DURATION ==================================================
-                        temp_key_var2 = key.lower()
-                        temp_pattern = ''
-                        duration_time = ''
-                        if 'duration' in temp_key_var2:
-#                             print('Current Duration: ', value)
-                            if 'year' in value.lower():
-                                duration = float(''.join(filter(str.isdigit, value))[0])
-                                duration_time = 'Years'
-#                                 print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
-                                course_data['Duration'] = duration
-                                course_data['Duration_Time'] = duration_time
-                            elif 'month' in value.lower():
-                                duration = float(''.join(filter(str.isdigit, value))[0])
-                                duration_time = 'Months'
-#                                 print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
-                                course_data['Duration'] = duration
-                                course_data['Duration_Time'] = duration_time
+                            temp_key_var2 = key.lower()
+                            temp_pattern = ''
+                            duration_time = ''
+                            if 'duration' in temp_key_var2:
+#                                 print('Current Duration: ', value)
+                                if 'year' in value.lower():
+                                    valueNum = DurationConverter.convert_duration(value)
+                                    duration = float(''.join(filter(str.isdigit, valueNum.__str__()))[0])
+                                    # DurationConverter.convert_duration(duration)
+                                    duration_time = 'Years'
+#                                     print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                    course_data['Duration'] = duration
+                                    course_data['Duration_Time'] = duration_time
+                                elif 'month' in value.lower():
+                                    duration = float(''.join(filter(str.isdigit, value))[0])
+                                    duration_time = 'Months'
+#                                     print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                    course_data['Duration'] = duration
+                                    course_data['Duration_Time'] = duration_time
 
 #                         print('CUR KEY AND VALUE: ', key, value)
                         dd_all_text.remove(value)
