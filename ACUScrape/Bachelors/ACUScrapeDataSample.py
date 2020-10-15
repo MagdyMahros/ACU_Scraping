@@ -141,7 +141,27 @@ for each_url in course_links_file:
                             dd_all_text.append(x2)
                 for key in dt_all_text:
                     for value in dd_all_text:
-                        course_data[key] = value
+                        for value in dd_all_text:
+                        # DURATION ==================================================
+                        temp_key_var2 = key.lower()
+                        temp_pattern = ''
+                        duration_time = ''
+                        if 'duration' in temp_key_var2:
+#                             print('Current Duration: ', value)
+                            if 'year' in value.lower():
+                                duration = float(''.join(filter(str.isdigit, value))[0])
+                                duration_time = 'Years'
+#                                 print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                course_data['Duration'] = duration
+                                course_data['Duration_Time'] = duration_time
+                            elif 'month' in value.lower():
+                                duration = float(''.join(filter(str.isdigit, value))[0])
+                                duration_time = 'Months'
+#                                 print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                course_data['Duration'] = duration
+                                course_data['Duration_Time'] = duration_time
+
+#                         print('CUR KEY AND VALUE: ', key, value)
                         dd_all_text.remove(value)
                         break
 
@@ -275,6 +295,7 @@ for each_url in course_links_file:
                     career_path.append(careerP)
             career_path = ' '.join(career_path)
             course_data['Career_path'] = career_path.strip()
+
     course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
     course_data_all.append(course_data)
 
