@@ -17,6 +17,7 @@ import requests
 import os
 import copy
 import DurationConverter
+import TemplateData
 
 
 def get_page(url):
@@ -56,7 +57,9 @@ csv_file = csv_file_path.__str__() + '/ACU_bachelors.csv'
 
 course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
                'Full_Time': '', 'Part_Time': '', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
-               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Prerequiste_1': '', 'Prequisite_1_grade':''}
+               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Prerequiste_1': '', 
+               'Prequisite_1_grade':'', 'Mode_of_Study': '', 'City': '', 'Study_Type': '', 'Online_Only': 'No', 
+               'Blended': '', 'Online': '', 'Offline': '', 'Distance': 'Blended', 'Int_Description': '', 'Level_Code': '', 'Course_Level': ''}
 
 possible_cities = {'ballarat': 'Ballarat',
                    'blacktown': 'Blacktown',
@@ -68,6 +71,9 @@ possible_cities = {'ballarat': 'Ballarat',
                    'north sydney': 'North Sydney'}
 
 course_data_all = []
+level_key = TemplateData.level_key  # dictionary of course levels
+
+faculty_key = TemplateData.faculty_key  # dictionary of course levels
 
 for each_url in course_links_file:
     actual_cities = []
@@ -85,7 +91,17 @@ for each_url in course_links_file:
     if soup.find('header', class_='col-md-12 desktop-width'):  # check if the course page has a valid title
         course_title = soup.find('header', class_='col-md-12 desktop-width').text
         course_data['Course'] = course_title.strip().replace('\n', '')
-    time.sleep(1)
+    if course_data['Course'] == '':  # check elsewhere if this code doesn't fetch the title
+        if soup.find('header', class_='banner-header-bg'):  # check if the course page has a valid title
+            header = soup.find('header', class_='banner-header-bg')
+            if header:
+                div1 = header.find('div', class_='banner-header')
+                if div1:
+                    h1 = div1.find('h1')
+                    if h1:
+                        course_data['Course'] = h1.get_text()
+
+    
 
     # STUDY_MODE
     if soup("div", {"id": "course--availability--domestic"}):
