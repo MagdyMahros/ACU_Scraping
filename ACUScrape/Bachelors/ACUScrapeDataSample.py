@@ -245,7 +245,7 @@ for each_url in course_links_file:
                     all_p_list_text = ' '.join(all_p_list).strip()
                     course_data['Description'] = all_p_list_text
 
-    # DOMESTIC COURSE PRICE
+    # DOMESTIC FEES
     div1 = soup.find_all('div', id='course--costs--domestic')
     if div1:
         for div_n in div1:
@@ -262,8 +262,15 @@ for each_url in course_links_file:
                                 costs_domestic = li_p.get_text().strip()
                                 dom_costs_list.append(costs_domestic)
                         dom_costs = ' '.join(dom_costs_list)
-                        print('DOMESTIC COURSE PRICE: ', dom_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
-                        course_data['Domestic_Course_Price'] = dom_costs.strip()
+                        print('DOMESTIC COURSE PRICE: ',
+                              dom_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
+                        dom_costs = dom_costs.strip().lower()
+                        currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
+                        if 'average first year fee' in dom_costs and 'unit' not in dom_costs:
+                            dom_costs_final = ''.join(re.findall(currency_pattern, dom_costs)).replace('$', '')
+                            course_data['Local_Fees'] = dom_costs_final
+                        else:
+                            course_data['Local_Fees'] = '0'  # some of the course won't charge local students
 
     # INTERNATIONAL COURSE PRICE
     div1 = soup.find_all('div', id='course--costs--international')
