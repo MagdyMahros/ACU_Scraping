@@ -56,7 +56,7 @@ csv_file = csv_file_path.__str__() + '/ACU_bachelors.csv'
 
 course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
                'Full_Time': '', 'Part_Time': '', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
-               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': ''}
+               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Prerequiste_1': '', 'Prequisite_1_grade':''}
 
 possible_cities = {'ballarat': 'Ballarat',
                    'blacktown': 'Blacktown',
