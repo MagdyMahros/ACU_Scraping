@@ -235,29 +235,13 @@ for each_url in course_links_file:
                         int_costs_firstYear = [' ']
                         int_costs_Unit = [' ']
                         for index, li_p in enumerate(li):
-                            if index == 0:
-                                costs_Unit = li_p.contents.__str__().strip()
-                                if costs_Unit:
-                                    costs_Unit = li_p.get_text().strip()
-                                    int_costs_Unit.append(costs_Unit)
-                            elif index == 1:
+                            if index == 1:
                                 costs_firstYear = li_p.contents.__str__().strip()
                                 if costs_firstYear:
                                     costs_firstYear = li_p.get_text().strip()
                                     int_costs_firstYear.append(costs_firstYear)
-                            elif index == 2:
-                                costs_total = li_p.contents.__str__().strip()
-                                if costs_total:
-                                    costs_total = li_p.get_text().strip()
-                                    #                                     print(costs_total)
-                                    int_costs_total.append(costs_total)
                         int_costs_total = ' '.join(int_costs_total)
                         int_costs_firstYear = ' '.join(int_costs_firstYear)
-                        int_costs_Unit = ' '.join(int_costs_Unit)
-                        #                         print('INTERNATIONAL COURSE PRICE: ', int_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
-                        # course_data['International unit cost'] = int_costs_Unit.strip()
-                        # course_data['International first year cost'] = int_costs_firstYear.strip()
-                        # course_data['International total cost'] = int_costs_total.strip()
                         int_costs = int_costs_firstYear.strip().lower()
                         currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
                         if 'year' in int_costs and '$' in int_costs:
