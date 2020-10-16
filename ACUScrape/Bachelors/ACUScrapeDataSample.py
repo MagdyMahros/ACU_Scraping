@@ -347,9 +347,28 @@ for each_url in course_links_file:
                     career_path.append(careerP)
             career_path = ' '.join(career_path)
             course_data['Career_path'] = career_path.strip()
+    
+    #PREREQUISITE_1
+    prerequisite_div = soup.find('div', id='course--requirements--domestic')
+    if prerequisite_div:
+        prerequisite_list = ['']
+        pre_div = prerequisite_div.find('div', class_ = 'col-md-9 course-info__details')
+        if pre_div:
+            pre_p = pre_div.find_all('p')
+            if pre_p:
+                for index, p in enumerate(pre_p):
+                    if p:
+                        prerequi_parag = p.contents.__str__()
+                        if prerequi_parag:
+                            prerequi_parag = p.get_text().strip()
+                            if 'year 12 level' in prerequi_parag:
+                                prerequisite_list.append('year 12')
+                                print('yes there is year 12')
+                                print(prerequi_parag)
+                prerequisite_list = ''.join(prerequisite_list)
+                course_data['Prerequiste_1'] = prerequisite_list.strip()
 
-    course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
-    course_data_all.append(course_data)
+    
 
     # removing the columns we don't need
     if 'Available to:' in course_data:
@@ -365,8 +384,10 @@ for each_url in course_links_file:
         course_data_all.append(copy.deepcopy(course_data))
     del actual_cities
 
-# print(*course_data_all, sep='\n')
 
+    course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
+    course_data_all.append(course_data)
+    # print(*course_data_all, sep='\n')
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
 
