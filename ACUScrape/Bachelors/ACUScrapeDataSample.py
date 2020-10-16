@@ -177,6 +177,7 @@ for each_url in course_links_file:
             if dt_all and dd_all:
                 dt_all_text = []
                 dd_all_text = []
+                grades_list = []
                 for each_dt in dt_all:
                     dt_all_text.append(each_dt.text)
                 for each_dd in dd_all:
@@ -201,9 +202,18 @@ for each_url in course_links_file:
                     if ul_dd:
                         li = ul_dd.find_all('li', class_='no_bullet')
                         if li:
+                            #Prequisite1_grade
                             x1 = [i.text for i in li]
                             x2 = ' '.join(x1)
-                            dd_all_text.append(x2)
+                            temp = re.findall(r'\d+\.\d+|\d+/\d+', x2)
+                            res = list(map(str, temp))
+                            for index, number in enumerate(res):
+                                    if index == 0:
+#                                         print(number)
+                                        grades_list.append(number)
+                            grades_list = ' '.join(grades_list)
+                            print(grades_list)
+                            course_data['Prequisite_1_grade'] = grades_list
                 for key in dt_all_text:
                     for value in dd_all_text:
                         for value in dd_all_text:    
