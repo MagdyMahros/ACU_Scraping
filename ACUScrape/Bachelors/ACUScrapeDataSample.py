@@ -363,11 +363,10 @@ for each_url in course_links_file:
                             prerequi_parag = p.get_text().strip()
                             if 'year 12 level' in prerequi_parag:
                                 prerequisite_list.append('year 12')
-                                print('yes there is year 12')
-                                print(prerequi_parag)
+                                # print('yes there is year 12')
+                                # print(prerequi_parag)
                 prerequisite_list = ''.join(prerequisite_list)
                 course_data['Prerequiste_1'] = prerequisite_list.strip()
-
     
 
     # removing the columns we don't need
