@@ -49,13 +49,13 @@ browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
 
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
-course_links_file_path = course_links_file_path.__str__() + '/acu_postgrad_links_file'
+course_links_file_path = course_links_file_path.__str__() + '/acu_postgrad_links_file.txt'
 course_links_file = open(course_links_file_path, 'r')
 
 
 # the csv file we'll be saving the courses to
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
-csv_file = csv_file_path.__str__() + 'ACU_postgrad.csv'
+csv_file = csv_file_path.__str__() + '/ACU_postgrad.csv'
 
 course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
                'Full_Time': 'No', 'Part_Time': 'No', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
@@ -391,6 +391,8 @@ for each_url in course_links_file:
                                 value_conv = DurationConverter.convert_duration(value)
                                 duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                 duration_time = 'Years'
+                                if str(duration) == '1' or str(duration) == '1.00' or str(duration) == '1.0':
+                                    duration_time = 'Year'
                                 # print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                 course_data['Duration'] = duration
                                 course_data['Duration_Time'] = duration_time

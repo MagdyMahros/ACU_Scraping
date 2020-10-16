@@ -47,7 +47,7 @@ browser = webdriver.Chrome(executable_path=exec_path, options=option)
 
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
-course_links_file_path = course_links_file_path.__str__() + '/acu_research_links_file.txt'
+course_links_file_path = course_links_file_path.__str__() + '/acu_bachelor_links_file.txt'
 course_links_file = open(course_links_file_path, 'r')
 
 
@@ -294,6 +294,8 @@ for each_url in course_links_file:
                                     value_conv = DurationConverter.convert_duration(value)
                                     duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                     duration_time = 'Years'
+                                    if str(duration) == '1' or str(duration) == '1.00' or str(duration) == '1.0':
+                                        duration_time = 'Year'
                                     # print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                     course_data['Duration'] = duration
                                     course_data['Duration_Time'] = duration_time
