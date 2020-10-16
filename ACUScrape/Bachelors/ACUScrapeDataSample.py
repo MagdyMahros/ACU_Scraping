@@ -206,28 +206,38 @@ for each_url in course_links_file:
                             dd_all_text.append(x2)
                 for key in dt_all_text:
                     for value in dd_all_text:
-                        for value in dd_all_text:
-                        # DURATION ==================================================
+                        for value in dd_all_text:    
                             temp_key_var2 = key.lower()
+                            temp_value_var2 = value.lower()
                             temp_pattern = ''
                             duration_time = ''
                             if 'duration' in temp_key_var2:
-#                                 print('Current Duration: ', value)
+                                # MODE OF STUDY (PART_TIME/FULL_TME) ======================================
+                                if 'full-time' in temp_value_var2:
+                                    course_data['Mode_of_Study'] = 'Full Time'
+                                    course_data['Full_Time'] = 'Yes'
+                                if 'part-time' in temp_value_var2:
+                                    course_data['Mode_of_Study'] = 'Part Time'
+                                    course_data['Part_Time'] = 'Yes'
+                                if 'full-time' in temp_value_var2 and 'part-time' in temp_value_var2:
+                                    course_data['Mode_of_Study'] = 'Full Time / Part Time'
+                                
+                                # DURATION + DURATION_TIME =============================================
+                                print('Current Duration: ', value)
                                 if 'year' in value.lower():
-                                    valueNum = DurationConverter.convert_duration(value)
-                                    duration = float(''.join(filter(str.isdigit, valueNum.__str__()))[0])
-                                    # DurationConverter.convert_duration(duration)
+                                    value_conv = DurationConverter.convert_duration(value)
+                                    duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                     duration_time = 'Years'
-#                                     print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                    print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                     course_data['Duration'] = duration
                                     course_data['Duration_Time'] = duration_time
-                                elif 'month' in value.lower():
-                                    duration = float(''.join(filter(str.isdigit, value))[0])
+                                elif 'month' in value.lower() and 'year' not in value.lower():
+                                    value_conv = DurationConverter.convert_duration(value)
+                                    duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                     duration_time = 'Months'
-#                                     print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                    print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                     course_data['Duration'] = duration
                                     course_data['Duration_Time'] = duration_time
-
 #                         print('CUR KEY AND VALUE: ', key, value)
                         dd_all_text.remove(value)
                         break
