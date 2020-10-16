@@ -33,12 +33,6 @@ def get_page(url):
         pass
     return None
 
-
-def remove_banned_words(to_print, database_regex):
-    pattern = re.compile(r"\b(" + "|".join(database_regex) + ")\\W", re.I)
-    return pattern.sub("", to_print)
-
-
 def save_data_json(title, data):
     with open(title, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -53,7 +47,7 @@ option.add_argument(" - incognito")
 option.add_argument("headless")
 option.add_argument('--no-sandbox')
 exec_path = Path(os.getcwd().replace('\\', '/'))
-exec_path = exec_path.parent.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
+exec_path = exec_path.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
 browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
 
 # read the url from each file into a list
