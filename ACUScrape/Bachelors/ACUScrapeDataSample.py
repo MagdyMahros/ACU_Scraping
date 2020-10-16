@@ -15,7 +15,7 @@ import bs4 as bs4
 from bs4 import Comment
 import requests
 import os
-import DurationConverter
+from CustomMethods import DurationConverter
 
 
 def get_page(url):
@@ -30,9 +30,6 @@ def get_page(url):
     except Exception as e:
         pass
     return None
-
-
-
 
 # selenium web driver
 # we need the Chrome driver to simulate JavaScript functionality
@@ -60,9 +57,19 @@ course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'E
                'Full_Time': '', 'Part_Time': '', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
                'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': ''}
 
+possible_cities = {'ballarat': 'Ballarat',
+                   'blacktown': 'Blacktown',
+                   'brisbane': 'Brisbane',
+                   'canberra': 'Canberra',
+                   'melbourne': 'Melbourne',
+                   'strathfield': 'New South Wales',
+                   'new south wales': 'New South Wales',
+                   'north sydney': 'North Sydney'}
 
 course_data_all = []
+
 for each_url in course_links_file:
+    actual_cities = []
     browser.get(each_url)
     pure_url = each_url.strip()
     each_url = browser.page_source
@@ -80,9 +87,38 @@ for each_url in course_links_file:
     time.sleep(1)
 
     # STUDY_MODE
-    h3 = soup.find('h3')
-    if h3:
-        course_data['Study_Mode'] = h3.text
+    if soup("div", {"id": "course--availability--domestic"}):
+        div1 = soup.find("div", {"id": "course--availability--domestic"})
+        if div1:
+            div2 = div1.find('div', class_='col-md-9 course-info__details')
+            if div2:
+                ul = div2.find('ul')
+                if ul:
+                    availability = []
+                    for each_li in ul:
+                        li = each_li.find('strong')
+                        if li:
+                            availability_mode = li.__str__().strip()\
+                                .replace('<strong>', '')\
+                                .replace('</strong>', '')\
+                                .replace('-1', '').strip()
+                            availability.append(availability_mode.lower())
+                            if 'online' in availability:
+                                course_data['Online'] = 'Yes'
+                                course_data['Study_Type'] = 'Online'
+                                course_data['Study_Mode'] = '2'
+                            if 'online' not in availability:
+                                course_data['Offline'] = 'Yes'
+                                course_data['Study_Type'] = 'Offline'
+                                course_data['Study_Mode'] = '1'
+                            if 'online only' in availability:
+                                course_data['Online_Only'] = 'Yes'
+                                course_data['Study_Type'] = 'Online Only'
+                                course_data['Study_Mode'] = '2'
+                            if 'attendance' in availability and 'multi-mode' in availability:
+                                course_data['Study_Type'] = 'Mixed'
+                                course_data['Study_Mode'] = '3'
+                    # print('NEW STUDY MODE: ', course_data['Study_Mode'], '\t', availability)
 
     # AVAILABILITY and LOCATION
     div1 = soup.find('div', class_='box__information--gray box--courses')
@@ -102,6 +138,31 @@ for each_url in course_links_file:
                         dd_items.append(some_dd.text)
                     for key in dt_items:
                         for value in dd_items:
+                            temp_key_var = key.lower()
+                            temp_value_var = value.lower()
+
+                            # AVAILABILITY
+                            # only availability will be extracted here since Madgy is doing other data
+                            if "available to" in temp_key_var:
+                                if 'domestic students only' in temp_value_var:
+                                    course_data['Availability'] = 'D'
+                                elif 'international students only' in temp_value_var:
+                                    course_data['Availability'] = 'I'
+                                elif 'international' in temp_value_var and 'domestic' in temp_value_var:
+                                    course_data['Availability'] = 'A'
+                                else:
+                                    course_data['Availability'] = 'N'
+                            print('AVAILABILITY B1: ', course_data['Availability'])
+
+                            # LOCATION/CITY
+                            for i in possible_cities:
+                                if i in temp_value_var:
+                                    actual_cities.append(possible_cities[i])
+                                else:
+                                    if 'online only' in temp_value_var:
+                                        print('this course is online only')
+
+                            print('CITY/LOCATION: ', actual_cities)
                             course_data[key] = value
                             dd_items.remove(value)
                             break
@@ -172,43 +233,6 @@ for each_url in course_links_file:
                         dd_all_text.remove(value)
                         break
 
-    # COURSE START DATE INTERNATIONAL
-    if soup('div', {'id': 'course--start-dates--international'}):
-        div1 = soup.findAll('div', {'id': 'course--start-dates--international'})[0]
-        if div1:
-            div2 = div1.find('div', class_='col-md-9')
-            if div2:
-                all_ul = div2.find_all('ul')
-                brisbane_inter_start_date = []
-                melbourne_inter_start_date = []
-                north_sydney_inter_start_date = []
-                all_inter_start_date = []
-                if all_ul:
-                    for ul in all_ul:
-                        li = ul.find('li')
-                        if li:
-                            for text in li(text=lambda text: isinstance(text, Comment)):
-                                text.extract()
-                                li_list = li.text
-#                             li_list = [x.__str__() for x in li]
-                            all_inter_start_date.append(li_list)
-
-                try:
-                    course_data['Brisbane_International_Start_Date'] = \
-                        all_inter_start_date[0].replace('\n','')
-                except IndexError:
-                    course_data['Brisbane_International_Start_Date'] = 'null'
-                try:
-                    course_data['Melbourne_International_Start_Date'] = \
-                        all_inter_start_date[1].replace('\n','')
-                except IndexError:
-                    course_data['Melbourne_International_Start_Date'] = 'null'
-                try:
-                    course_data['North_Sydney_International_Start_Date'] = \
-                        all_inter_start_date[2].replace('\n','')
-                except IndexError:
-                    course_data['North_Sydney_International_Start_Date'] = 'null'
-
     # COURSE DESCRIPTION
     if soup("div", {"id": "course--description--domestic"}):
         div1 = soup.find_all("div", {"id": "course--description--domestic"})[0]
@@ -251,33 +275,38 @@ for each_url in course_links_file:
                 if ul:
                     li = ul.find_all('li', class_='no_bullet')
                     if li:
-                        int_costs_total = [' ']
                         int_costs_firstYear = [' ']
-                        int_costs_Unit = [' ']
                         for index, li_p in enumerate(li):
-                            if index == 0:
-                                costs_Unit = li_p.contents.__str__().strip()
-                                if costs_Unit:
-                                    costs_Unit = li_p.get_text().strip()
-                                    int_costs_Unit.append(costs_Unit)
-                            elif index == 1:
+                            if index == 1:
                                 costs_firstYear = li_p.contents.__str__().strip()
                                 if costs_firstYear:
                                     costs_firstYear = li_p.get_text().strip()
                                     int_costs_firstYear.append(costs_firstYear)
-                            elif index == 2:
-                                costs_total = li_p.contents.__str__().strip()
-                                if costs_total:
-                                    costs_total = li_p.get_text().strip()
-                                    print(costs_total)
-                                    int_costs_total.append(costs_total)
-                        int_costs_total = ' '.join(int_costs_total)
                         int_costs_firstYear = ' '.join(int_costs_firstYear)
-                        int_costs_Unit = ' '.join(int_costs_Unit)
 #                         print('INTERNATIONAL COURSE PRICE: ', int_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
-                        course_data['International unit cost'] = int_costs_Unit.strip()
-                        course_data['International first year cost'] = int_costs_firstYear.strip()
-                        course_data['International total cost'] = int_costs_total.strip()
+                        int_costs = int_costs_firstYear.strip().lower()
+                        currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
+                        if 'year' in int_costs and '$' in int_costs:
+                            int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
+                            int_currency_time = 'Years'
+                            course_data['Int_Fees'] = int_price_final
+                            course_data['Currency_Time'] = int_currency_time
+                            print('COST PER YEAR: ', int_price_final)
+                        elif 'month' in int_costs and '$' in int_costs:
+                            int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
+                            int_currency_time = 'Months'
+                            course_data['Int_Fees'] = int_price_final
+                            course_data['Currency_Time'] = int_currency_time
+                            print('COST PER MONTH: ', int_price_final)
+                        elif 'week' in int_costs and '$' in int_costs:
+                            int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
+                            int_currency_time = 'Weeks'
+                            course_data['Int_Fees'] = int_price_final
+                            course_data['Currency_Time'] = int_currency_time
+                            print('COST PER WEEK: ', int_price_final)
+                        else:
+                            course_data['Int_Fees'] = ''
+                            course_data['Currency_Time'] = ''
 
     #CAREER PATH
     career_path_div = soup.find('div', id='course--career--domestic')
