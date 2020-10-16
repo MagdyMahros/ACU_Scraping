@@ -162,12 +162,12 @@ for each_url in course_links_file:
                                 else:
                                     if 'online only' in temp_value_var:
                                         print('this course is online only')
-                            print('CITY/LOCATION: ', actual_cities)
+                            # print('CITY/LOCATION: ', actual_cities)
                             course_data[key] = value
                             dd_items.remove(value)
                             break
 
-    # PREREQUISITE_1, DURATION, DURATION_TIME, ATAR , and a few other bundled data
+    # DURATION, DURATION_TIME, ATAR , and a few other bundled data
     div1 = soup.find_all("div", {"class": "col-xs-12 col-sm-6 col-md-6 col-lg-6"})[1]
     if div1:
         dl = div1.find('dl', class_='row')
@@ -212,7 +212,7 @@ for each_url in course_links_file:
 #                                         print(number)
                                         grades_list.append(number)
                             grades_list = ' '.join(grades_list)
-                            print(grades_list)
+                            # print(grades_list)
                             course_data['Prequisite_1_grade'] = grades_list
                 for key in dt_all_text:
                     for value in dd_all_text:
@@ -233,19 +233,19 @@ for each_url in course_links_file:
                                     course_data['Mode_of_Study'] = 'Full Time / Part Time'
                                 
                                 # DURATION + DURATION_TIME =============================================
-                                print('Current Duration: ', value)
+                                # print('Current Duration: ', value)
                                 if 'year' in value.lower():
                                     value_conv = DurationConverter.convert_duration(value)
                                     duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                     duration_time = 'Years'
-                                    print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                    # print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                     course_data['Duration'] = duration
                                     course_data['Duration_Time'] = duration_time
                                 elif 'month' in value.lower() and 'year' not in value.lower():
                                     value_conv = DurationConverter.convert_duration(value)
                                     duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                     duration_time = 'Months'
-                                    print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                    # print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                     course_data['Duration'] = duration
                                     course_data['Duration_Time'] = duration_time
 #                         print('CUR KEY AND VALUE: ', key, value)
@@ -317,19 +317,19 @@ for each_url in course_links_file:
                             int_currency_time = 'Years'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
-                            print('COST PER YEAR: ', int_price_final)
+                            # print('COST PER YEAR: ', int_price_final)
                         elif 'month' in int_costs and '$' in int_costs:
                             int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
                             int_currency_time = 'Months'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
-                            print('COST PER MONTH: ', int_price_final)
+                            # print('COST PER MONTH: ', int_price_final)
                         elif 'week' in int_costs and '$' in int_costs:
                             int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
                             int_currency_time = 'Weeks'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
-                            print('COST PER WEEK: ', int_price_final)
+                            # print('COST PER WEEK: ', int_price_final)
                         else:
                             course_data['Int_Fees'] = ''
                             course_data['Currency_Time'] = ''

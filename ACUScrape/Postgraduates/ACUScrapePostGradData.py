@@ -62,7 +62,7 @@ csv_file = csv_file_path.__str__() + 'ACU_postgrad_cleaned.csv'
 course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
                'Full_Time': 'No', 'Part_Time': 'No', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
                'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Mode_of_Study': '',
-               'City': '', 'Study_Type': '', 'Online_Only': 'No'}
+               'City': '', 'Study_Type': '', 'Online_Only': 'No', 'Prerequiste_1':''}
 
 possible_cities = {'ballarat': 'Ballarat',
                    'blacktown': 'Blacktown',
@@ -80,7 +80,7 @@ for each_url in course_links_file:
 
     browser.get(each_url)
     pure_url = each_url.strip()
-    print('CURRENT LINK: ', pure_url)
+    # print('CURRENT LINK: ', pure_url)
     each_url = browser.page_source
 
     soup = bs4.BeautifulSoup(each_url, 'html.parser')
@@ -139,7 +139,7 @@ for each_url in course_links_file:
                             if 'attendance' in availability and 'multi-mode' in availability:
                                 course_data['Study_Type'] = 'Mixed'
                                 course_data['Study_Mode'] = '3'
-                    print('NEW STUDY MODE: ', course_data['Study_Mode'], '\t', availability)
+                    # print('NEW STUDY MODE: ', course_data['Study_Mode'], '\t', availability)
 
     # AVAILABILITY and LOCATION (and some other bundled data)
     div1 = soup.find('div', class_='box__information--gray box--courses')
@@ -159,7 +159,7 @@ for each_url in course_links_file:
                         dd_items.append(some_dd.text)
                     for key in dt_items:
                         for value in dd_items:
-                            print(key + 'B1: ' + value)
+                            # print(key + 'B1: ' + value)
                             temp_key_var = key.lower()
                             temp_value_var = value.lower()
 
@@ -174,7 +174,7 @@ for each_url in course_links_file:
                                     course_data['Availability'] = 'A'
                                 else:
                                     course_data['Availability'] = 'N'
-                            print('AVAILABILITY B1: ', course_data['Availability'])
+                            # print('AVAILABILITY B1: ', course_data['Availability'])
 
                             # LOCATION/CITY
                             for i in possible_cities:
@@ -184,7 +184,7 @@ for each_url in course_links_file:
                                     if 'online only' in temp_value_var:
                                         print('this course is online only')
 
-                            print('CITY/LOCATION: ', actual_cities)
+                            # print('CITY/LOCATION: ', actual_cities)
                             course_data[key] = value
                             dd_items.remove(value)
                             break
@@ -206,8 +206,8 @@ for each_url in course_links_file:
                                 costs_domestic = li_p.get_text().strip()
                                 dom_costs_list.append(costs_domestic)
                         dom_costs = ' '.join(dom_costs_list)
-                        print('DOMESTIC COURSE PRICE: ',
-                              dom_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
+                        # print('DOMESTIC COURSE PRICE: ',
+                        #       dom_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
                         dom_costs = dom_costs.strip().lower()
                         currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
                         if 'average first year fee' in dom_costs and 'unit' not in dom_costs:
@@ -243,19 +243,19 @@ for each_url in course_links_file:
                             int_currency_time = 'Years'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
-                            print('COST PER YEAR: ', int_price_final)
+                            # print('COST PER YEAR: ', int_price_final)
                         elif 'month' in int_costs and '$' in int_costs:
                             int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
                             int_currency_time = 'Months'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
-                            print('COST PER MONTH: ', int_price_final)
+                            # print('COST PER MONTH: ', int_price_final)
                         elif 'week' in int_costs and '$' in int_costs:
                             int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
                             int_currency_time = 'Weeks'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
-                            print('COST PER WEEK: ', int_price_final)
+                            # print('COST PER WEEK: ', int_price_final)
                         else:
                             course_data['Int_Fees'] = ''
                             course_data['Currency_Time'] = ''
@@ -320,7 +320,7 @@ for each_url in course_links_file:
                 for key in dt_all_text:
                     for value in dd_all_text:
                         # course_data[key] = value
-                        print(key + 'B2: ' + value)
+                        # print(key + 'B2: ' + value)
 
                         temp_key_var2 = key.lower()
                         temp_value_var2 = value.lower()
@@ -337,28 +337,49 @@ for each_url in course_links_file:
                                 course_data['Part_Time'] = 'Yes'
                             if 'full-time' in temp_value_var2 and 'part-time' in temp_value_var2:
                                 course_data['Mode_of_Study'] = 'Full Time / Part Time'
-                            print('MODE OF STUDY: ', course_data['Mode_of_Study'])
+                            # print('MODE OF STUDY: ', course_data['Mode_of_Study'])
 
                             # DURATION + DURATION_TIME =============================================
-                            print('Current Duration: ', value)
+                            # print('Current Duration: ', value)
                             if 'year' in value.lower():
                                 value_conv = DurationConverter.convert_duration(value)
                                 duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                 duration_time = 'Years'
-                                print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                # print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                 course_data['Duration'] = duration
                                 course_data['Duration_Time'] = duration_time
                             elif 'month' in value.lower() and 'year' not in value.lower():
                                 value_conv = DurationConverter.convert_duration(value)
                                 duration = float(''.join(filter(str.isdigit, str(value_conv)))[0])
                                 duration_time = 'Months'
-                                print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
+                                # print('FILTERED DURATION + DURATION_TIME: ' + str(duration) + ' ' + duration_time)
                                 course_data['Duration'] = duration
                                 course_data['Duration_Time'] = duration_time
 
-                        print('CUR KEY AND VALUE: ', key, value)
+                        # print('CUR KEY AND VALUE: ', key, value)
                         dd_all_text.remove(value)
                         break
+    #PREREQUISITE_1
+    prerequisite_div = soup.find('div', id='course--requirements--domestic')
+    if prerequisite_div:
+        prerequisite_list = ['']
+        pre_div = prerequisite_div.find('div', class_ = 'col-md-9 course-info__details')
+        if pre_div:
+            pre_ol = pre_div.find('ol')
+            if pre_ol:
+                pre_li = pre_ol.find_all('li')
+                if pre_li:
+                    for index, li in enumerate(pre_li):
+                        if index == 0:
+                            prerequi_parag = li.contents.__str__()
+                            if prerequi_parag:
+                                prerequi_parag = li.get_text().strip().replace('; or','').replace('; OR','').replace(';','')
+                                print(prerequi_parag)
+                                prerequisite_list.append(prerequi_parag)
+                                    # print('yes there is year 12')
+                                    # print(prerequi_parag)
+                prerequisite_list = ''.join(prerequisite_list)
+                course_data['Prerequiste_1'] = prerequisite_list.strip()
 
     # removing the columns we don't need
     if 'Available to:' in course_data:
@@ -374,7 +395,7 @@ for each_url in course_links_file:
         course_data_all.append(copy.deepcopy(course_data))
     del actual_cities
 
-print(*course_data_all, sep='\n')
+# print(*course_data_all, sep='\n')
 
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
