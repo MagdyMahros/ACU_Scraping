@@ -114,6 +114,35 @@ for each_url in course_links_file:
         for j in faculty_key[i]:
             if j.lower() in course_data['Course'].lower():
                 course_data['Faculty'] = i
+    
+    # COURSE DESCRIPTION
+    # domestic/local
+    if soup("div", {"id": "course--description--domestic"}):
+        div1 = soup.find_all("div", {"id": "course--description--domestic"})[0]
+        if div1:
+            div2 = div1.find('div', class_='col-md-9 course-info__details')
+            if div2:
+                all_p = div2.find_all('p')
+                if all_p:
+                    all_p_list = [i.text for i in all_p]
+                    all_p_list_text = ' '.join(all_p_list).strip()
+                    course_data['Description'] = all_p_list_text
+    # international
+    if soup("section", {"id": "tab-international"}):
+        # section = soup.find("section", {"id": "tab-international"})[0]
+        section = soup.find('section', id='tab-international')
+        if section:
+            div1 = section.find('div', id='course--description--domestic')
+            if div1:
+                div2 = div1.find('div', class_='col-md-9 course-info__details')
+                if div2:
+                    p_list = div2.find_all('p')
+                    if p_list:
+                        paragraph_list = []
+                        for p in p_list:
+                            paragraph_list.append(p.get_text())
+                        paragraphs = ''.join(paragraph_list).strip()
+                        course_data['Int_Description'] = paragraphs
 
     # STUDY_MODE
     if soup("div", {"id": "course--availability--domestic"}):
@@ -171,7 +200,6 @@ for each_url in course_links_file:
                             temp_value_var = value.lower()
 
                             # AVAILABILITY
-                            # only availability will be extracted here since Madgy is doing other data
                             if "available to" in temp_key_var:
                                 if 'domestic students only' in temp_value_var:
                                     course_data['Availability'] = 'D'
@@ -279,18 +307,6 @@ for each_url in course_links_file:
 #                         print('CUR KEY AND VALUE: ', key, value)
                         dd_all_text.remove(value)
                         break
-
-    # COURSE DESCRIPTION
-    if soup("div", {"id": "course--description--domestic"}):
-        div1 = soup.find_all("div", {"id": "course--description--domestic"})[0]
-        if div1:
-            div2 = div1.find('div', class_='col-md-9 course-info__details')
-            if div2:
-                all_p = div2.find_all('p')
-                if all_p:
-                    all_p_list = [i.text for i in all_p]
-                    all_p_list_text = ' '.join(all_p_list).strip()
-                    course_data['Description'] = all_p_list_text
 
     # DOMESTIC FEES
     div1 = soup.find_all('div', id='course--costs--domestic')
@@ -422,8 +438,8 @@ for each_url in course_links_file:
     del actual_cities
 
 
-    course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
-    course_data_all.append(course_data)
+    # course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
+    # course_data_all.append(course_data)
     # print(*course_data_all, sep='\n')
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
