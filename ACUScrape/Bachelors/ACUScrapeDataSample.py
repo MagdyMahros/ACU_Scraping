@@ -15,7 +15,8 @@ import bs4 as bs4
 from bs4 import Comment
 import requests
 import os
-from CustomMethods import DurationConverter
+import copy
+import DurationConverter
 
 
 def get_page(url):
@@ -120,7 +121,7 @@ for each_url in course_links_file:
                                 course_data['Study_Mode'] = '3'
                     # print('NEW STUDY MODE: ', course_data['Study_Mode'], '\t', availability)
 
-    # AVAILABILITY and LOCATION
+    # AVAILABILITY and LOCATION (and some other bundled data)
     div1 = soup.find('div', class_='box__information--gray box--courses')
     if div1:
         div2 = div1.find('div', class_='col-xs-12 col-sm-6 col-md-6 col-lg-6')
@@ -152,7 +153,7 @@ for each_url in course_links_file:
                                     course_data['Availability'] = 'A'
                                 else:
                                     course_data['Availability'] = 'N'
-                            print('AVAILABILITY B1: ', course_data['Availability'])
+                            # print('AVAILABILITY B1: ', course_data['Availability'])
 
                             # LOCATION/CITY
                             for i in possible_cities:
@@ -161,13 +162,12 @@ for each_url in course_links_file:
                                 else:
                                     if 'online only' in temp_value_var:
                                         print('this course is online only')
-
                             print('CITY/LOCATION: ', actual_cities)
                             course_data[key] = value
                             dd_items.remove(value)
                             break
 
-    # PREREQUISITE_1 (ATAR , and a few other bundled data)
+    # PREREQUISITE_1, DURATION, DURATION_TIME, ATAR , and a few other bundled data
     div1 = soup.find_all("div", {"class": "col-xs-12 col-sm-6 col-md-6 col-lg-6"})[1]
     if div1:
         dl = div1.find('dl', class_='row')
@@ -188,7 +188,6 @@ for each_url in course_links_file:
                             if not isinstance(i, bs4.NavigableString):
                                 if i.next_sibling == None:
                                     temp_dd.append(i.text)
-
                                 elif i.next_sibling != None:
                                     temp_dd.append(i.text)
                                     temp_dd.append(i.next_sibling)
@@ -356,9 +355,7 @@ for each_url in course_links_file:
         course_data_all.append(copy.deepcopy(course_data))
     del actual_cities
 
-print(*course_data_all, sep='\n')
-
-
+# print(*course_data_all, sep='\n')
 
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
