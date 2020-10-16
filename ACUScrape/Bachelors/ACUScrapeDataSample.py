@@ -100,8 +100,20 @@ for each_url in course_links_file:
                     h1 = div1.find('h1')
                     if h1:
                         course_data['Course'] = h1.get_text()
-
+    time.sleep(1)  # just to slow down the scraper to avoid too many connections to server
     
+    # DECIDE THE LEVEL CODE
+    for i in level_key:
+        for j in level_key[i]:
+            if j in course_data['Course']:
+                course_data['Level_Code'] = i
+                course_data['Course_Level'] = j
+
+    # DECIDE THE FACULTY
+    for i in faculty_key:
+        for j in faculty_key[i]:
+            if j.lower() in course_data['Course'].lower():
+                course_data['Faculty'] = i
 
     # STUDY_MODE
     if soup("div", {"id": "course--availability--domestic"}):
