@@ -17,6 +17,7 @@ import bs4 as bs4
 import requests
 import os
 import DurationConverter
+import TemplateData
 
 
 def get_page(url):
@@ -32,9 +33,6 @@ def get_page(url):
         pass
     return None
 
-def save_data_json(title, data):
-    with open(title, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 # selenium web driver
@@ -57,12 +55,13 @@ course_links_file = open(course_links_file_path, 'r')
 
 # the csv file we'll be saving the courses to
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
-csv_file = csv_file_path.__str__() + 'ACU_postgrad_cleaned.csv'
+csv_file = csv_file_path.__str__() + 'ACU_postgrad.csv'
 
 course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
                'Full_Time': 'No', 'Part_Time': 'No', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
                'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Mode_of_Study': '',
-               'City': '', 'Study_Type': '', 'Online_Only': 'No', 'Prerequiste_1':''}
+               'City': '', 'Study_Type': '', 'Online_Only': 'No', 'Prerequiste_1':'', 'Blended': '', 'Online': '', 'Offline': '',
+               'Distance': 'Blended', 'Int_Description': '', 'Level_Code': '', 'Course_Level': '', 'Faculty': ''}
 
 possible_cities = {'ballarat': 'Ballarat',
                    'blacktown': 'Blacktown',
@@ -74,6 +73,10 @@ possible_cities = {'ballarat': 'Ballarat',
                    'north sydney': 'North Sydney'}
 
 course_data_all = []
+
+level_key = TemplateData.level_key  # dictionary of course levels
+
+faculty_key = TemplateData.faculty_key
 
 for each_url in course_links_file:
     actual_cities = []
@@ -93,9 +96,36 @@ for each_url in course_links_file:
     if soup.find('header', class_='col-md-12 desktop-width'):  # check if the course page has a valid title
         course_title = soup.find('header', class_='col-md-12 desktop-width').text
         course_data['Course'] = course_title.strip().replace('\n', '')
-    time.sleep(1)
+    if course_data['Course'] == '':  # check elsewhere if this code doesn't fetch the title
+        if soup.find('header', class_='banner-header-bg'):  # check if the course page has a valid title
+            header = soup.find('header', class_='banner-header-bg')
+            if header:
+                div1 = header.find('div', class_='banner-header')
+                if div1:
+                    h1 = div1.find('h1')
+                    if h1:
+                        course_data['Course'] = h1.get_text()
+                        print(course_data['Course'])
+
+    time.sleep(1)  # just to slow down the scraper to avoid too many connections to server
+
+     # DECIDE THE LEVEL CODE
+    for i in level_key:
+        for j in level_key[i]:
+            if j in course_data['Course']:
+                course_data['Level_Code'] = i
+                course_data['Course_Level'] = j
+    # print('COURSE LEVEL: ', course_data['Course_Level'])
+
+    # DECIDE THE FACULTY
+    for i in faculty_key:
+        for j in faculty_key[i]:
+            if j.lower() in course_data['Course'].lower():
+                course_data['Faculty'] = i
+    # print('FACULTY: ', course_data['Faculty'])
 
     # COURSE DESCRIPTION
+    # domestic/local
     if soup("div", {"id": "course--description--domestic"}):
         div1 = soup.find_all("div", {"id": "course--description--domestic"})[0]
         if div1:
@@ -106,6 +136,22 @@ for each_url in course_links_file:
                     all_p_list = [i.text for i in all_p]
                     all_p_list_text = ' '.join(all_p_list).strip()
                     course_data['Description'] = all_p_list_text
+    # international
+    if soup("section", {"id": "tab-international"}):
+        # section = soup.find("section", {"id": "tab-international"})[0]
+        section = soup.find('section', id='tab-international')
+        if section:
+            div1 = section.find('div', id='course--description--domestic')
+            if div1:
+                div2 = div1.find('div', class_='col-md-9 course-info__details')
+                if div2:
+                    p_list = div2.find_all('p')
+                    if p_list:
+                        paragraph_list = []
+                        for p in p_list:
+                            paragraph_list.append(p.get_text())
+                        paragraphs = ''.join(paragraph_list).strip()
+                        course_data['Int_Description'] = paragraphs
 
     # STUDY_MODE
     if soup("div", {"id": "course--availability--domestic"}):
@@ -284,7 +330,7 @@ for each_url in course_links_file:
             career_path = ' '.join(career_path)
             course_data['Career_Outcomes'] = career_path.strip()
 
-    # PREREQUISITE_1, DURATION, DURATION_TIME, ATAR , and a few other bundled data
+    # DURATION, DURATION_TIME, ATAR , and a few other bundled data
     div1 = soup.find_all("div", {"class": "col-xs-12 col-sm-6 col-md-6 col-lg-6"})[1]
     if div1:
         dl = div1.find('dl', class_='row')
