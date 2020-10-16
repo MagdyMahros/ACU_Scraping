@@ -262,8 +262,8 @@ for each_url in course_links_file:
                                 costs_domestic = li_p.get_text().strip()
                                 dom_costs_list.append(costs_domestic)
                         dom_costs = ' '.join(dom_costs_list)
-                        print('DOMESTIC COURSE PRICE: ',
-                              dom_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
+                        # print('DOMESTIC COURSE PRICE: ',
+                        #       dom_costs.strip().replace('\n', '').replace('<', '').replace('>', ''))
                         dom_costs = dom_costs.strip().lower()
                         currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
                         if 'average first year fee' in dom_costs and 'unit' not in dom_costs:
@@ -342,7 +342,23 @@ for each_url in course_links_file:
     course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
     course_data_all.append(course_data)
 
+    # removing the columns we don't need
+    if 'Available to:' in course_data:
+        del course_data['Available to:']
+    if 'Location:' in course_data:
+        del course_data['Location:']
+    if 'CRICOS:' in course_data:
+        del course_data['CRICOS:']
+
+    # duplicating entries with multiple cities for each city
+    for i in actual_cities:
+        course_data['City'] = possible_cities[i.lower()]
+        course_data_all.append(copy.deepcopy(course_data))
+    del actual_cities
+
 print(*course_data_all, sep='\n')
+
+
 
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
