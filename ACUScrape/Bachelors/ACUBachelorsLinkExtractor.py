@@ -1,6 +1,7 @@
 """Description:
 
     * author: Awwal Mohammed
+    * refactored and edited by: Magdy Abdelkader
     * company: Fresh Futures/Seeka Technologies
     * position: IT Intern
     * date: 09-10-20
@@ -37,7 +38,7 @@ option.add_argument(" - incognito")
 option.add_argument("headless")
 exec_path = Path(os.getcwd().replace('\\', '/'))
 exec_path = exec_path.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
-browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
+browser = webdriver.Chrome(executable_path=exec_path, options=option)
 
 
 # MAIN ROUTINE
@@ -53,7 +54,7 @@ target_link_tag = soup.find_all('input', class_='hdnUrlValue')
 for tag in target_link_tag:
     course_links.append(tag['value'])
 
-course_links_file_path = os.getcwd().replace('\\', '/') + '/acu_research_links_file'
+course_links_file_path = os.getcwd().replace('\\', '/') + '/acu_bachelor_links_file.txt'
 course_links_file = open(course_links_file_path, 'w')
 for i in course_links:
     if i is not None and i is not "" and i is not "\n":
