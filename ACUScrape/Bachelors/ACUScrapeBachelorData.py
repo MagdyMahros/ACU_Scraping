@@ -55,11 +55,11 @@ course_links_file = open(course_links_file_path, 'r')
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
 csv_file = csv_file_path.__str__() + '/ACU_bachelors.csv'
 
-course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
-               'Full_Time': '', 'Part_Time': '', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
-               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Prerequiste_1': '', 
-               'Prequisite_1_grade':'', 'Mode_of_Study': '', 'City': '', 'Study_Type': '', 'Online_Only': 'No', 
-               'Blended': '', 'Online': '', 'Offline': '', 'Distance': 'Blended', 'Int_Description': '', 'Level_Code': '', 'Course_Level': ''}
+course_data = { 'Level_Code': '', 'University': 'Australian Catholic University', 'City': '', 'Country':'Australia', 
+                'Course': '', 'Int_Fees': '', 'Local_Fees': '', 'Currency': 'AUD', 'Currency_Time': '',
+                'Duration': '','Duration_Time':'', 'Full_Time': '', 'Part_Time': '', 'Prerequisite_1': '', 'Prequisite_1_grade':'', 
+                'Website': '', 'Course_Lang': 'English', 'Availability': '', 'Study_Mode': '', 'Description': '', 'Int_Description': '', 
+                'Mode_of_Study': '', 'Study_Type': '', 'Online': '', 'Offline': '', 'Course_Level': ''}
 
 possible_cities = {'ballarat': 'Ballarat',
                    'blacktown': 'Blacktown',
@@ -167,6 +167,7 @@ for each_url in course_links_file:
                                 course_data['Study_Mode'] = '2'
                             if 'online' not in availability:
                                 course_data['Offline'] = 'Yes'
+                                course_data['Online'] = 'No'
                                 course_data['Study_Type'] = 'Offline'
                                 course_data['Study_Mode'] = '1'
                             if 'online only' in availability:
@@ -261,11 +262,11 @@ for each_url in course_links_file:
                             #Prequisite1_grade
                             x1 = [i.text for i in li]
                             x2 = ' '.join(x1)
-                            temp = re.findall(r'\d+\.\d+|\d+/\d+', x2)
+                            temp = re.findall(r'\d+\.\d+', x2)
                             res = list(map(str, temp))
                             for index, number in enumerate(res):
                                     if index == 0:
-#                                         print(number)
+                                        # print(number)
                                         grades_list.append(number)
                             grades_list = ' '.join(grades_list)
                             # print(grades_list)
@@ -360,7 +361,7 @@ for each_url in course_links_file:
                         currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
                         if 'year' in int_costs and '$' in int_costs:
                             int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
-                            int_currency_time = 'Years'
+                            int_currency_time = 'Year'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
                             # print('COST PER YEAR: ', int_price_final)
@@ -402,7 +403,7 @@ for each_url in course_links_file:
                     careerP = p.get_text().strip()
                     career_path.append(careerP)
             career_path = ' '.join(career_path)
-            course_data['Career_path'] = career_path.strip()
+            course_data['Career_Outcomes'] = career_path.strip()
     
     #PREREQUISITE_1
     prerequisite_div = soup.find('div', id='course--requirements--domestic')
@@ -410,19 +411,16 @@ for each_url in course_links_file:
         prerequisite_list = ['']
         pre_div = prerequisite_div.find('div', class_ = 'col-md-9 course-info__details')
         if pre_div:
-            pre_p = pre_div.find_all('p')
-            if pre_p:
-                for index, p in enumerate(pre_p):
-                    if p:
-                        prerequi_parag = p.contents.__str__()
-                        if prerequi_parag:
-                            prerequi_parag = p.get_text().strip()
-                            if 'year 12 level' in prerequi_parag:
-                                prerequisite_list.append('year 12')
-                                # print('yes there is year 12')
-                                # print(prerequi_parag)
+                prerequisite_list.append('year 12')
+            # pre_p = pre_div.find_all('p')
+            # if pre_p:
+            #     for index, p in enumerate(pre_p):
+            #         if p:
+            #             prerequi_parag = p.contents.__str__()
+            #             if prerequi_parag:
+            #                 prerequi_parag = p.get_text().strip()
                 prerequisite_list = ''.join(prerequisite_list)
-                course_data['Prerequiste_1'] = prerequisite_list.strip()
+                course_data['Prerequisite_1'] = prerequisite_list.strip()
     
 
     # removing the columns we don't need
@@ -432,6 +430,12 @@ for each_url in course_links_file:
         del course_data['Location:']
     if 'CRICOS:' in course_data:
         del course_data['CRICOS:']
+    if 'Study_Type' in course_data:
+        del course_data['Study_Type']
+    if 'Online_Only' in course_data:
+        del course_data['Online_Only']
+    if 'Mode_of_Study' in course_data:
+        del course_data['Mode_of_Study']
 
     # duplicating entries with multiple cities for each city
     for i in actual_cities:
@@ -440,9 +444,13 @@ for each_url in course_links_file:
     del actual_cities
 
 
-    # course_data = {str(key).strip().replace(':', '').replace('\n', ''): str(item).strip().replace('\n', '') for key, item in course_data.items()}
-    # course_data_all.append(course_data)
-    # print(*course_data_all, sep='\n')
+# Reorder the data dictionary(this will be used to reorder the CSV file)
+# output dict needs a list for new column ordering
+desired_order_list = ['Level_Code', 'University', 'City', 'Country', 'Course', 'Faculty', 'Int_Fees', 'Local_Fees', 'Currency', 'Currency_Time',
+                'Duration','Duration_Time', 'Full_Time', 'Part_Time', 'Prerequisite_1', 'Prequisite_1_grade', 
+                'Website', 'Course_Lang', 'Availability', 'Study_Mode', 'Description', 'Int_Description', 'Career_Outcomes', 
+                'Mode_of_Study', 'Study_Type', 'Online', 'Offline', 'Course_Level']
+
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
 
@@ -450,3 +458,11 @@ with open(csv_file, 'w', encoding='utf-8', newline='') as output_file:
     dict_writer = csv.DictWriter(output_file, course_dict_keys)
     dict_writer.writeheader()
     dict_writer.writerows(course_data_all)
+
+with open(csv_file, 'r', encoding='utf-8') as infile, open('ACU_bachelors_ordered.csv', 'w', encoding='utf-8', newline='') as outfile:
+    writer = csv.DictWriter(outfile, fieldnames=desired_order_list)
+    # reorder the header first
+    writer.writeheader()
+    for row in csv.DictReader(infile):
+        # writes the reordered rows to the new file
+        writer.writerow(row)

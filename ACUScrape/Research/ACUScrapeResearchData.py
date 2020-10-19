@@ -57,11 +57,11 @@ course_links_file = open(course_links_file_path, 'r')
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
 csv_file = csv_file_path.__str__() + '/ACU_research.csv'
 
-course_data = {'University': 'Australian Catholic University', 'Course_Lang': 'English', 'Currency': 'AUD',
-               'Full_Time': 'No', 'Part_Time': 'No', 'Availability': '', 'Currency_Time': '', 'Study_Mode': '',
-               'Int_Fees': '', 'Local_Fees': '', 'Website': '', 'Course': '', 'Description': '', 'Mode_of_Study': '',
-               'City': '', 'Study_Type': '', 'Online_Only': 'No', 'Blended': '', 'Online': '', 'Offline': '',
-               'Distance': 'Blended', 'Int_Description': '', 'Level_Code': '', 'Course_Level': '', 'Faculty': ''}
+course_data = { 'Level_Code': '', 'University': 'Australian Catholic University', 'City': '', 'Country':'Australia', 
+                'Course': '', 'Int_Fees': '', 'Local_Fees': '', 'Currency': 'AUD', 'Currency_Time': '',
+                'Duration': '','Duration_Time':'', 'Full_Time': '', 'Part_Time': '', 'Prerequisite_1': '', 'Prequisite_1_grade':'', 
+                'Website': '', 'Course_Lang': 'English', 'Availability': '', 'Study_Mode': '', 'Description': '', 'Int_Description': '', 
+                'Mode_of_Study': '', 'Study_Type': '', 'Online': '', 'Offline': '', 'Course_Level': ''}
 
 
 possible_cities = {'ballarat': 'Ballarat',
@@ -173,6 +173,7 @@ for each_url in course_links_file:
                                 course_data['Study_Mode'] = '2'
                             if 'online' not in availability:
                                 course_data['Offline'] = 'Yes'
+                                course_data['Online'] = 'No'
                                 course_data['Study_Type'] = 'Offline'
                                 course_data['Study_Mode'] = '1'
                             if 'online only' in availability:
@@ -282,7 +283,7 @@ for each_url in course_links_file:
                         currency_pattern = "(?:[\£\$\€]{1}[,\d]+.?\d*)"
                         if 'year' in int_costs and '$' in int_costs:
                             int_price_final = ''.join(re.findall(currency_pattern, int_costs)).replace('$', '')
-                            int_currency_time = 'Years'
+                            int_currency_time = 'Year'
                             course_data['Int_Fees'] = int_price_final
                             course_data['Currency_Time'] = int_currency_time
                             # print('COST PER YEAR: ', int_price_final)
@@ -435,17 +436,30 @@ for each_url in course_links_file:
                                 prerequi_parag = li.get_text().strip().replace('; or','').replace('; OR','').replace(';','').replace('and','')
                                 print(prerequi_parag)
                                 prerequisite_list.append(prerequi_parag)
-                                    # print('yes there is year 12')
-                                    # print(prerequi_parag)
                 prerequisite_list = ''.join(prerequisite_list)
-                course_data['Prerequiste_1'] = prerequisite_list.strip()
+                course_data['Prerequisite_1'] = prerequisite_list.strip()
 
 # print(*course_data_all, sep='\n')
 
-# tabulate our data
+# Reorder the data dictionary(this will be used to reorder the CSV file)
+# output dict needs a list for new column ordering
+desired_order_list = ['Level_Code', 'University', 'City', 'Country', 'Course', 'Faculty', 'Int_Fees', 'Local_Fees', 'Currency', 'Currency_Time',
+                'Duration','Duration_Time', 'Full_Time', 'Part_Time', 'Prerequisite_1', 'Prequisite_1_grade', 
+                'Website', 'Course_Lang', 'Availability', 'Study_Mode', 'Description', 'Int_Description', 'Career_Outcomes', 
+                'Mode_of_Study', 'Study_Type', 'Online', 'Offline', 'Course_Level']
+
+
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
 
 with open(csv_file, 'w', encoding='utf-8', newline='') as output_file:
     dict_writer = csv.DictWriter(output_file, course_dict_keys)
     dict_writer.writeheader()
     dict_writer.writerows(course_data_all)
+
+with open(csv_file, 'r', encoding='utf-8') as infile, open('ACU_research_ordered.csv', 'w', encoding='utf-8', newline='') as outfile:
+    writer = csv.DictWriter(outfile, fieldnames=desired_order_list)
+    # reorder the header first
+    writer.writeheader()
+    for row in csv.DictReader(infile):
+        # writes the reordered rows to the new file
+        writer.writerow(row)
