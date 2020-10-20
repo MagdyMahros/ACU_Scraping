@@ -451,7 +451,7 @@ for each_url in course_links_file:
 desired_order_list = ['Level_Code', 'University', 'City', 'Country', 'Course', 'Faculty', 'Int_Fees', 'Local_Fees', 'Currency', 'Currency_Time',
                 'Duration','Duration_Time', 'Full_Time', 'Part_Time', 'Prerequisite_1', 'Prequisite_1_grade', 
                 'Website', 'Course_Lang', 'Availability', 'Study_Mode', 'Description', 'Int_Description', 'Career_Outcomes', 
-                'Mode_of_Study', 'Study_Type', 'Online', 'Offline', 'Course_Level']
+                'Mode_of_Study', 'Online', 'Offline', 'Course_Level']
 
 # tabulate our data
 course_dict_keys = set().union(*(d.keys() for d in course_data_all))
