@@ -412,6 +412,14 @@ for each_url in course_links_file:
         del course_data['Location:']
     if 'CRICOS:' in course_data:
         del course_data['CRICOS:']
+    if 'Study_Type' in course_data:
+        del course_data['Study_Type']
+    if 'Online_Only' in course_data:
+        del course_data['Online_Only']
+    if 'Mode_of_Study' in course_data:
+        del course_data['Mode_of_Study']
+    if 'Study_Type' in course_data:
+        del course_data['Study_Type']
 
     # duplicating entries with multiple cities for each city
     for i in actual_cities:
